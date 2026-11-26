@@ -9,7 +9,8 @@ services:
     ports:
       - "${MYSQL_PORT:-3306}:3306"
     volumes:
-      - jbmodas-data:/var/lib/mysql
+      - jvolumes:
+        - jbmodas-data-v2:/var/lib/mysql
     healthcheck:
       test:
         ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-p${DB_PASSWORD}"]
@@ -36,4 +37,4 @@ services:
       - backend
 
 volumes:
-  jbmodas-data:
+  jbmodas-data-v2:
