@@ -1,0 +1,371 @@
+<!-- Conteúdo Principal -->
+  <main class="main-content jb-page">
+
+    <header class="top-bar">
+
+      <input
+        type="text"
+        placeholder="Buscar movimentações..."
+        class="search-input"
+        [value]="busca"
+        (input)="aoBuscar($any($event.target).value)" />
+
+      <div class="top-right">
+
+        <div class="user-badge">
+
+          <strong>Olá, {{ gerente.nome }}</strong>
+          <small>{{ gerente.cargo }}</small>
+
+        </div>
+
+      </div>
+
+    </header>
+
+    <div class="financeiro-header-row">
+
+      <div>
+
+        <h1>Financeiro</h1>
+
+        <p class="subtitle">
+          Controle entradas, despesas e o saldo da loja.
+        </p>
+
+      </div>
+
+      <div class="date-range-badge">
+
+        <span>{{ periodo }}</span>
+
+      </div>
+
+    </div>
+
+    <p *ngIf="erro" class="jb-erro" role="alert">{{ erro }} <button type="button" class="jb-sec" (click)="erro = ''; carregarMovimentacoes(); carregarClientes()">Tentar novamente</button></p>
+
+    <p *ngIf="carregando" role="status" class="jb-carregando">Carregando informações...</p>
+    <!-- Indicadores Financeiros -->
+    <div class="cards-grid">
+
+      <div class="card">
+
+        <span>Entradas</span>
+
+        <h3>{{ carregando || erro ? '—' : (entradas | currency:'BRL':'symbol':'1.2-2':'pt-BR') }}</h3>
+
+        <small>Recebido neste mês</small>
+
+      </div>
+
+      <div class="card">
+
+        <span>Despesas</span>
+
+        <h3>{{ carregando || erro ? '—' : (despesas | currency:'BRL':'symbol':'1.2-2':'pt-BR') }}</h3>
+
+        <small>Pago neste mês</small>
+
+      </div>
+
+      <div class="card">
+
+        <span>Saldo do período</span>
+
+        <h3>{{ carregando || erro ? '—' : (saldoPeriodo | currency:'BRL':'symbol':'1.2-2':'pt-BR') }}</h3>
+
+        <small>Entradas menos despesas</small>
+
+      </div>
+
+      <div class="card alert-card">
+
+        <span>A receber</span>
+
+        <h3>{{ carregando || erro ? '—' : (aReceber | currency:'BRL':'symbol':'1.2-2':'pt-BR') }}</h3>
+
+        <small class="text-danger">
+
+          {{ pendentesReceber }} recebimentos pendentes · todos os períodos
+
+        </small>
+
+      </div>
+
+      <div class="card alert-card">
+        <span>A pagar</span>
+        <h3>{{ carregando || erro ? '—' : (aPagar | currency:'BRL':'symbol':'1.2-2':'pt-BR') }}</h3>
+        <small>Despesas pendentes · todos os períodos</small>
+      </div>
+    </div>
+
+    <!-- Barra de Ações -->
+    <div class="action-bar">
+
+      <input
+        type="text"
+        placeholder="Buscar financeiro..."
+        class="search-financeiro"
+        [value]="busca"
+        (input)="aoBuscar($any($event.target).value)" />
+
+      <div class="action-buttons">
+
+        <button
+          class="btn-outline"
+          type="button"
+          (click)="alternarFiltros()">
+
+          Filtros
+
+        </button>
+
+        <button
+          class="btn-outline"
+          type="button"
+          (click)="exportar()">
+
+          Exportar
+
+        </button>
+
+        <button
+          class="btn-primary"
+          type="button"
+          [disabled]="carregando" (click)="novoLancamento()">
+
+          + Lançamento
+
+        </button>
+
+      </div>
+
+    </div>
+
+    <!-- Filtros -->
+    @if (filtrosAbertos) {
+
+      <div class="filtros-panel">
+
+        <label>
+
+          Filtrar por tipo:
+
+          <select
+            [value]="filtroSelecionado"
+            (change)="escolherFiltro($any($event.target).value)">
+
+            <option value="Todos">Todos</option>
+
+            <option value="ENTRADA">Entrada</option>
+
+            <option value="SAIDA">Saída</option>
+
+          </select>
+
+        </label>
+
+        <button
+          class="btn-outline"
+          type="button"
+          (click)="limparFiltros()">
+
+          Limpar filtros
+
+        </button>
+
+      </div>
+
+    }
+
+    <!-- Tabela Movimentações Financeiras -->
+    <div class="table-card">
+
+      <h3>Movimentações financeiras</h3>
+
+      <table class="financeiro-table">
+
+        <thead>
+
+          <tr>
+
+            <th>Descrição</th>
+            <th>Categoria</th>
+            <th>Cliente</th>
+            <th>Vencimento</th>
+            <th>Pagamento</th>
+            <th>Tipo</th>
+            <th>Valor</th>
+            <th>Status</th>
+            <th>Ações</th>
+
+          </tr>
+
+        </thead>
+
+        <tbody>
+
+          <tr *ngIf="total === 0">
+
+            <td colspan="9" class="sem-resultado">
+
+              {{ carregando ? 'Carregando registros...' : erro ? 'Não foi possível consultar todos os dados.' : 'Nenhum registro encontrado.' }}
+
+            </td>
+
+          </tr>
+
+          <tr *ngFor="let m of movimentacoesFiltradas">
+
+            <td>
+
+              <strong>{{ m.descricao }}</strong>
+
+            </td>
+
+            <td>{{ m.categoria }}</td>
+
+            <td>{{ nomeCliente(m) }}</td>
+
+            <td>
+
+              {{ m.dataVencimento
+                ? (m.dataVencimento | date:'dd/MM/yyyy')
+                : '—' }}
+
+            </td>
+
+            <td>
+
+              {{ m.dataPagamento
+                ? (m.dataPagamento | date:'dd/MM/yyyy')
+                : '—' }}
+
+            </td>
+
+            <td>
+
+              <span [ngClass]="{
+                'text-green': m.tipo === 'ENTRADA',
+                'text-red': m.tipo === 'SAIDA'
+              }">
+
+                {{ m.tipo === 'ENTRADA'
+                  ? 'Entrada'
+                  : 'Saída' }}
+
+              </span>
+
+            </td>
+
+            <td>{{ m.valor | currency:'BRL':'symbol':'1.2-2':'pt-BR' }}</td>
+
+            <td>
+
+              <span class="status-pill"
+                    [ngClass]="{
+                      'cancelado': pagamentoInvalido(m) || m.status === 'CANCELADO',
+                      'recebido': m.status === 'PAGO' && !pagamentoInvalido(m)
+                        && m.tipo === 'ENTRADA',
+
+                      'pago': m.status === 'PAGO' && !pagamentoInvalido(m)
+                        && m.tipo === 'SAIDA',
+
+                      'areceber': m.status === 'PENDENTE'
+                        && m.tipo === 'ENTRADA',
+
+                      'apagar': m.status === 'PENDENTE'
+                        && m.tipo === 'SAIDA'
+                    }">
+
+                {{ nomeStatus(m) }}
+              </span>
+              <small class="text-danger" *ngIf="m.status === 'PENDENTE' && vencido(m)">Vencido</small>
+
+
+            </td>
+
+            <td>
+
+              @if (m.status === 'PENDENTE') {
+
+                <button
+                  class="btn-primary"
+                  type="button"
+                  [disabled]="carregando" (click)="registrarPagamento(m)">
+
+                  {{ m.tipo === 'ENTRADA'
+                    ? 'Receber'
+                    : 'Pagar' }}
+
+                </button>
+
+              }
+
+              @if (!m.venda) {
+
+                <button
+                  class="btn-outline"
+                  type="button"
+                  [disabled]="carregando" (click)="editarLancamento(m)">
+
+                  Editar
+
+                </button>
+
+                <button
+                  class="btn-outline"
+                  type="button"
+                  [disabled]="carregando" (click)="excluirLancamento(m)">
+
+                  Excluir
+
+                </button>
+
+              }
+
+              @if (m.venda && m.status !== 'PENDENTE') {
+
+                <span>—</span>
+
+              }
+
+            </td>
+
+          </tr>
+
+        </tbody>
+
+      </table>
+
+      <div class="table-footer">
+
+        <span>
+
+          Mostrando {{ inicio }}-{{ fim }} de {{ total }} registros
+
+        </span>
+
+      </div>
+
+    </div>
+
+    <div class="alert-banner">
+
+      <span>
+
+        Total de despesas pendentes:
+        {{ carregando || erro ? '—' : (aPagar | currency:'BRL':'symbol':'1.2-2':'pt-BR') }}
+
+      </span>
+
+    </div>
+
+    <footer class="footer-demo">
+
+      <p>JB MODA · Gestão financeira</p>
+
+    </footer>
+
+  </main>

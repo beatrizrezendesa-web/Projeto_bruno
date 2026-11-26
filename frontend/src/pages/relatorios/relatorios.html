@@ -1,0 +1,379 @@
+<!-- Conteúdo Principal -->
+  <main class="main-content jb-page">
+
+    <header class="top-bar">
+
+      <input
+        type="text"
+        placeholder="Buscar relatórios..."
+        class="search-input"
+        [value]="busca"
+        (input)="onBusca($event)" />
+
+      <div class="top-right">
+
+        <div class="user-badge">
+
+          <strong>Olá, {{ gerente.nome }}</strong>
+          <small>{{ gerente.cargo }}</small>
+
+        </div>
+
+      </div>
+
+    </header>
+
+    <div class="page-header-row">
+
+      <div>
+
+        <h1>Relatórios</h1>
+
+        <p class="subtitle">
+          Transforme os resultados da loja em decisões.
+        </p>
+
+      </div>
+
+      <div class="date-range-badge">
+
+        <span>{{ periodo }}</span>
+
+      </div>
+
+    </div>
+
+    <p *ngIf="erro" class="jb-erro" role="alert">{{ erro }} <button type="button" class="jb-sec" (click)="erro = ''; carregarRelatorios()">Tentar novamente</button></p>
+
+    <p *ngIf="carregando">
+
+      Carregando relatórios...
+
+    </p>
+
+    <!-- Indicadores -->
+    <div class="cards-grid" *ngIf="!carregando && !erro">
+
+      @for (i of indicadores; track i.titulo) {
+
+        <div class="card" [class.alert-card]="i.destaque">
+
+          <span>{{ i.titulo }}</span>
+
+          <h3>{{ i.valor }}</h3>
+
+          <small>{{ i.legenda }}</small>
+
+        </div>
+
+      }
+
+    </div>
+
+    <!-- Barra de ações -->
+    <div class="action-bar">
+
+      <input
+        type="text"
+        placeholder="Buscar relatórios..."
+        class="search-relatorios"
+        [value]="busca"
+        (input)="onBusca($event)" />
+
+      <div class="action-buttons">
+
+        <button
+          class="btn-outline"
+          type="button"
+          (click)="alternarFiltros()"
+          [class.ativo]="filtrosAbertos || filtrosAtivos > 0">
+
+          Filtros
+
+          @if (filtrosAtivos > 0) {
+
+            <span class="badge-filtro">
+
+              {{ filtrosAtivos }}
+
+            </span>
+
+          }
+
+        </button>
+
+        <button
+          class="btn-outline"
+          type="button"
+          [disabled]="carregando || !!erro"
+          (click)="exportar()">
+
+          Exportar
+
+        </button>
+
+        <button
+          class="btn-primary"
+          type="button"
+          [disabled]="carregando"
+          (click)="abrirRelatorio()">
+
+          Gerar relatório
+
+        </button>
+
+      </div>
+
+    </div>
+
+    <!-- Painel de filtros -->
+    @if (filtrosAbertos) {
+
+      <div class="filtros-panel">
+
+        <label>
+
+          <span>Data inicial</span>
+
+          <input
+            type="date"
+            [(ngModel)]="inicioSel" />
+
+        </label>
+
+        <label>
+
+          <span>Data final</span>
+
+          <input
+            type="date"
+            [(ngModel)]="fimSel" />
+
+        </label>
+
+        <label>
+
+          <span>Limite de estoque</span>
+
+          <input
+            type="number"
+            min="0"
+            step="1"
+            [(ngModel)]="limiteSel" />
+
+        </label>
+
+        <div class="filtros-acoes">
+
+          <button
+            class="btn-outline"
+            type="button"
+            [disabled]="carregando"
+            (click)="limparFiltros()">
+
+            Limpar
+
+          </button>
+
+          <button
+            class="btn-primary"
+            type="button"
+            [disabled]="carregando"
+            (click)="aplicarFiltros()">
+
+            Aplicar
+
+          </button>
+
+        </div>
+
+      </div>
+
+    }
+
+    @if (filtrosAtivos > 0) {
+
+      <div class="filtros-ativos">
+
+        Mostrando:
+
+        <strong>{{ periodo }}</strong>
+
+        · Estoque até
+
+        <strong>{{ limiteEstoque }} unidades</strong>
+
+        <button
+          type="button"
+          class="link-limpar"
+          [disabled]="carregando"
+          (click)="limparFiltros()">
+
+          Limpar filtros
+
+        </button>
+
+      </div>
+
+    }
+
+    <div class="table-card" *ngIf="!carregando && !erro && resumoFinanceiro">
+      <h3>Pendências financeiras</h3>
+      <p>A receber no período: <strong>{{ resumoFinanceiro.aReceber | currency:'BRL':'symbol':'1.2-2':'pt-BR' }}</strong> · A pagar no período: <strong>{{ resumoFinanceiro.aPagar | currency:'BRL':'symbol':'1.2-2':'pt-BR' }}</strong></p>
+      <p>A receber (todas as pendências): <strong>{{ pendencias('ENTRADA') | currency:'BRL':'symbol':'1.2-2':'pt-BR' }}</strong> · A pagar (todas as pendências): <strong>{{ pendencias('SAIDA') | currency:'BRL':'symbol':'1.2-2':'pt-BR' }}</strong></p>
+    </div>
+    <!-- Gráficos -->
+    <div class="charts-grid" *ngIf="!carregando && !erro">
+
+      <div class="chart-card">
+
+        <h3>Evolução do faturamento</h3>
+
+        @if (faturamentoPorDia.length === 0) {
+
+          <p>Nenhuma venda no período.</p>
+
+        } @else {
+
+          <svg
+            [attr.viewBox]="'0 0 ' + largura + ' ' + altura"
+            class="line-chart"
+            role="img"
+            aria-label="Gráfico de faturamento por dia">
+
+            @for (y of [20, 50, 80, 120]; track y) {
+
+              <line
+                x1="20"
+                [attr.x2]="largura - 20"
+                [attr.y1]="y"
+                [attr.y2]="y"
+                class="grade" />
+
+            }
+
+            <polygon
+              [attr.points]="area"
+              class="area" />
+
+            <polyline
+              [attr.points]="linha"
+              class="linha" />
+
+            @for (p of pontos; track $index) {
+
+              <circle
+                [attr.cx]="p.x"
+                [attr.cy]="p.y"
+                r="3.5"
+                class="ponto">
+
+                <title>
+
+                  {{ faturamentoPorDia[$index].valor
+                    | currency:'BRL':'symbol':'1.2-2':'pt-BR' }}
+
+                </title>
+
+              </circle>
+
+            }
+
+            @for (f of faturamentoPorDia; track f.data; let i = $index) {
+
+              @if (i === 0 || i === faturamentoPorDia.length - 1) {
+
+                <text
+                  [attr.x]="pontos[i].x"
+                  y="142"
+                  class="rotulo"
+                  text-anchor="middle">
+
+                  {{ formatarData(f.data).substring(0, 5) }}
+
+                </text>
+
+              }
+
+            }
+
+          </svg>
+
+        }
+
+      </div>
+
+      <div class="chart-card">
+
+        <h3>Participação por categoria</h3>
+
+        <div class="cat-bars">
+
+          @for (c of categorias; track c.nome) {
+
+            <div class="cat">
+
+              <strong>{{ c.pct }}%</strong>
+
+              <div
+                class="cat-bar"
+                [style.height.px]="c.pct * 1.6 + 8"
+                [style.background]="c.cor">
+
+              </div>
+
+              <span>{{ c.nome }}</span>
+
+            </div>
+
+          } @empty {
+
+            <p>Nenhuma categoria vendida no período.</p>
+
+          }
+
+        </div>
+
+      </div>
+
+    </div>
+
+    <!-- Relatórios disponíveis -->
+    <div class="table-card" *ngIf="!carregando && !erro">
+
+      <h3>Relatórios disponíveis</h3>
+
+      <div class="reports-row">
+
+        @for (r of relatoriosFiltrados; track r.arquivo) {
+
+          <button
+            class="btn-report"
+            type="button"
+            (click)="gerar(r)">
+
+            {{ r.nome }}
+
+          </button>
+
+        } @empty {
+
+          <span class="empty">
+
+            Nenhum relatório encontrado.
+
+          </span>
+
+        }
+
+      </div>
+
+    </div>
+
+    <footer class="footer-demo">
+
+      <p>JB MODA · Relatórios de desempenho</p>
+
+    </footer>
+
+  </main>

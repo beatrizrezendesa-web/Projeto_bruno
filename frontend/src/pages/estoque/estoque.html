@@ -1,0 +1,277 @@
+<!-- Conteúdo Principal -->
+  <main class="main-content jb-page">
+
+    <header class="top-bar">
+
+      <input type="text"
+             placeholder="Buscar produtos..."
+             class="search-input"
+             [value]="busca"
+             (input)="aoBuscar($any($event.target).value)" />
+
+      <div class="top-right">
+
+        <div class="user-badge">
+          <strong>Olá, {{ gerente.nome }}</strong>
+          <small>{{ gerente.cargo }}</small>
+        </div>
+
+      </div>
+
+    </header>
+
+    <div class="estoque-header-row">
+
+      <div>
+        <h1>Estoque</h1>
+
+        <p class="subtitle">
+          Organize produtos, variações e reposições.
+        </p>
+      </div>
+
+      <div class="date-range-badge">
+        <span>Estoque atual</span>
+      </div>
+
+    </div>
+
+    <p *ngIf="erro" class="jb-erro" role="alert">{{ erro }} <button type="button" class="jb-sec" (click)="erro = ''; carregarProdutos()">Tentar novamente</button></p>
+
+    <!-- Cards de Indicadores de Estoque -->
+    <p *ngIf="carregando" role="status" class="jb-carregando">Carregando informações...</p>
+    <div class="cards-grid">
+
+      <div class="card">
+
+        <span>Peças disponíveis</span>
+
+        <h3>{{ carregando || erro ? '—' : (pecasDisponiveis) }}</h3>
+
+        <small>
+          {{ produtosVariacoes.length }} produtos cadastrados
+        </small>
+
+      </div>
+
+      <div class="card">
+
+        <span>Valor do estoque</span>
+
+        <h3>{{ carregando || erro ? '—' : (valorEstoque | currency:'BRL':'symbol':'1.2-2':'pt-BR') }}</h3>
+
+        <small>Valor potencial de venda</small>
+
+      </div>
+
+      <div class="card alert-card">
+
+        <span>Estoque baixo</span>
+
+        <h3>{{ carregando || erro ? '—' : (estoqueBaixo) }}</h3>
+
+        <small class="text-danger">
+          Produtos para repor
+        </small>
+
+      </div>
+
+      <div class="card alert-card">
+
+        <span>Sem estoque</span>
+
+        <h3>{{ carregando || erro ? '—' : (semEstoque) }}</h3>
+
+        <small class="text-danger">
+          Produtos sem unidades
+        </small>
+
+      </div>
+
+    </div>
+
+    <!-- Barra de Ações -->
+    <div class="action-bar">
+
+      <input type="text"
+             placeholder="Buscar estoque..."
+             class="search-estoque"
+             [value]="busca"
+             (input)="aoBuscar($any($event.target).value)" />
+
+      <div class="action-buttons">
+
+        <button class="btn-outline"
+                type="button"
+                (click)="alternarFiltros()">
+          Filtros
+        </button>
+
+        <button class="btn-outline"
+                type="button"
+                (click)="exportar()">
+          Exportar
+        </button>
+
+        <button class="btn-primary"
+                type="button"
+                [disabled]="carregando" (click)="novoProduto()">
+          + Produto
+        </button>
+
+      </div>
+
+    </div>
+
+    <!-- Filtros -->
+    @if (filtrosAbertos) {
+
+      <div class="filtros-panel">
+
+        <label>
+          Filtrar por categoria:
+
+          <select
+            [value]="filtroSelecionado"
+            (change)="escolherFiltro($any($event.target).value)">
+
+            <option value="Todos">Todos</option>
+            <option value="Fitness">Fitness</option>
+            <option value="Praia">Praia</option>
+
+          </select>
+
+        </label>
+
+        <button class="btn-outline"
+                type="button"
+                (click)="limparFiltros()">
+
+          Limpar filtros
+
+        </button>
+
+      </div>
+
+    }
+
+    <!-- Tabela Produtos e Variações -->
+    <div class="table-card">
+
+      <h3>Produtos e variações</h3>
+
+      <table class="estoque-table">
+
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Produto</th>
+            <th>Categoria</th>
+            <th>Variação</th>
+            <th>Preço</th>
+            <th>Estoque</th>
+            <th>Disponibilidade</th>
+            <th>Ações</th>
+          </tr>
+        </thead>
+
+        <tbody>
+
+          <tr *ngIf="total === 0">
+
+            <td colspan="8" class="sem-resultado">
+              {{ carregando ? 'Carregando registros...' : erro ? 'Não foi possível consultar todos os dados.' : 'Nenhum registro encontrado.' }}
+            </td>
+
+          </tr>
+
+          <tr *ngFor="let item of produtosFiltrados">
+
+            <td>
+              <strong>{{ item.id }}</strong>
+            </td>
+
+            <td>{{ item.nome }}</td>
+
+            <td>{{ item.categoria }}</td>
+
+            <td>{{ item.cor }} · {{ item.tamanho }}</td>
+
+            <td>{{ item.preco | currency:'BRL':'symbol':'1.2-2':'pt-BR' }}</td>
+
+            <td>
+
+              {{ item.quantidadeEstoque }} un.
+
+              <span class="badge-repor"
+                    *ngIf="item.quantidadeEstoque <= 5">
+                · Repor
+              </span>
+
+            </td>
+
+            <td>
+
+              {{ item.disponivel
+                ? 'Disponível'
+                : 'Indisponível' }}
+
+            </td>
+
+            <td>
+
+              <button class="btn-outline"
+                      type="button"
+                      [disabled]="carregando" (click)="editarProduto(item)">
+                Editar
+              </button>
+
+              <button class="btn-outline"
+                      type="button"
+                      [disabled]="carregando" (click)="excluirProduto(item)">
+                Excluir
+              </button>
+
+              <button class="btn-outline"
+                      type="button"
+                      [disabled]="carregando" (click)="alterarDisponibilidade(item)">
+
+                {{ item.disponivel ? 'Desativar' : 'Ativar' }}
+
+              </button>
+
+            </td>
+
+          </tr>
+
+        </tbody>
+
+      </table>
+
+      <div class="table-footer">
+
+        <span>
+          Mostrando {{ inicio }}-{{ fim }} de {{ total }} registros
+        </span>
+
+      </div>
+
+    </div>
+
+    <div class="alert-banner"
+         *ngIf="estoqueBaixo + semEstoque > 0">
+
+      <span>
+        Atenção: {{ estoqueBaixo + semEstoque }}
+        produtos precisam de reposição.
+      </span>
+
+    </div>
+
+    <footer class="footer-demo">
+
+      <p>JB MODA · Gestão de estoque</p>
+
+    </footer>
+
+  </main>
