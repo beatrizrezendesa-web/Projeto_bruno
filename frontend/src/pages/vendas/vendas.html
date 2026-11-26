@@ -1,0 +1,305 @@
+<!-- Conteúdo Principal -->
+  <main class="main-content jb-page">
+
+    <header class="top-bar">
+
+      <input
+        type="text"
+        placeholder="Buscar por produto, cliente, venda..."
+        class="search-input"
+        [value]="busca"
+        (input)="aoBuscar($any($event.target).value)" />
+
+      <div class="top-right">
+
+        <div class="user-badge">
+
+          <strong>Olá, {{ gerente.nome }}</strong>
+          <small>{{ gerente.cargo }}</small>
+
+        </div>
+
+      </div>
+
+    </header>
+
+    <div class="vendas-header-row">
+
+      <div>
+
+        <h1>Vendas</h1>
+
+        <p class="subtitle">
+          Consulte as vendas e registre novos atendimentos.
+        </p>
+
+      </div>
+
+      <div class="date-range-badge">
+
+        <span>Histórico de vendas</span>
+
+      </div>
+
+    </div>
+
+    <p *ngIf="erro" class="jb-erro" role="alert">{{ erro }} <button type="button" class="jb-sec" (click)="erro = ''; carregarVendas(); carregarPagamentos(); carregarClientes(); carregarProdutos()">Tentar novamente</button></p>
+
+    <p *ngIf="carregando" role="status" class="jb-carregando">Carregando informações...</p>
+    <!-- Indicadores -->
+    <div class="cards-grid">
+
+      <div class="card">
+
+        <span>Faturamento do mês</span>
+
+        <h3>{{ carregando || erro ? '—' : (faturamento | currency:'BRL':'symbol':'1.2-2':'pt-BR') }}</h3>
+
+        <small>
+          {{ vendasDoMes.length }} vendas no mês
+        </small>
+
+      </div>
+
+      <div class="card">
+
+        <span>Ticket médio</span>
+
+        <h3>{{ carregando || erro ? '—' : (ticketMedio | currency:'BRL':'symbol':'1.2-2':'pt-BR') }}</h3>
+
+        <small>Valor médio por venda no mês</small>
+
+      </div>
+
+      <div class="card">
+
+        <span>Vendas hoje</span>
+
+        <h3>{{ carregando || erro ? '—' : (vendasHoje | currency:'BRL':'symbol':'1.2-2':'pt-BR') }}</h3>
+
+        <small>
+          {{ quantidadeVendasHoje }} vendas realizadas
+        </small>
+
+      </div>
+
+      <div class="card alert-card">
+
+        <span>Cancelamentos</span>
+
+        <h3>{{ carregando || erro ? '—' : (canceladas) }}</h3>
+
+        <small>Total de vendas canceladas</small>
+
+      </div>
+
+    </div>
+
+    <!-- Barra de Ações -->
+    <div class="action-bar">
+
+      <input
+        type="text"
+        placeholder="Buscar vendas..."
+        class="search-vendas"
+        [value]="busca"
+        (input)="aoBuscar($any($event.target).value)" />
+
+      <div class="action-buttons">
+
+        <button
+          class="btn-outline"
+          type="button"
+          (click)="alternarFiltros()">
+
+          Filtros
+
+        </button>
+
+        <button
+          class="btn-outline"
+          type="button"
+          (click)="exportar()">
+
+          Exportar
+
+        </button>
+
+        <button
+          class="btn-primary"
+          type="button"
+          [disabled]="carregando" (click)="novaVenda()">
+
+          + Nova venda
+
+        </button>
+
+      </div>
+
+    </div>
+
+    <!-- Filtros -->
+    @if (filtrosAbertos) {
+
+      <div class="filtros-panel">
+
+        <label>
+
+          Filtrar por status:
+
+          <select
+            [value]="filtroSelecionado"
+            (change)="escolherFiltro($any($event.target).value)">
+
+            <option value="Todos">
+              Todos
+            </option>
+
+            <option value="CONCLUIDA">
+              Registrada
+            </option>
+
+            <option value="A receber">A receber</option>
+            <option value="Recebida">Recebida</option>
+            <option value="CANCELADA">
+              Cancelada
+            </option>
+
+          </select>
+
+        </label>
+
+        <button
+          class="btn-outline"
+          type="button"
+          (click)="limparFiltros()">
+
+          Limpar filtros
+
+        </button>
+
+      </div>
+
+    }
+
+    <!-- Histórico de Vendas -->
+    <div class="table-card">
+
+      <h3>Histórico de vendas</h3>
+
+      <table class="vendas-table">
+
+        <thead>
+
+          <tr>
+
+            <th>Venda</th>
+            <th>Pedido</th>
+            <th>Cliente</th>
+            <th>Data</th>
+            <th>Produtos</th>
+            <th>Canal</th>
+            <th>Pagamento</th>
+            <th>Valor</th>
+            <th>Situação do pagamento</th>
+            <th>Ações</th>
+
+          </tr>
+
+        </thead>
+
+        <tbody>
+
+          <tr *ngIf="total === 0">
+
+            <td colspan="10" class="sem-resultado">
+
+              {{ carregando ? 'Carregando registros...' : erro ? 'Não foi possível consultar todos os dados.' : 'Nenhum registro encontrado.' }}
+
+            </td>
+
+          </tr>
+
+          <tr *ngFor="let v of vendasFiltradas">
+
+            <td>
+              <strong>#{{ v.id }}</strong>
+            </td>
+
+            <td>{{ v.pedido?.id ? '#' + v.pedido?.id : 'Venda direta' }}</td>
+
+            <td>{{ nomeCliente(v) }}</td>
+
+            <td>{{ v.data | date:'dd/MM/yyyy' }}</td>
+
+            <td>
+
+              <div *ngFor="let item of v.itens">
+
+                {{ nomeProduto(item) }}
+                ({{ item.quantidade }} un.)
+
+              </div>
+
+            </td>
+
+            <td>{{ v.canal }}</td>
+
+            <td>{{ v.formaPagamento }}</td>
+
+            <td>{{ v.total | currency:'BRL':'symbol':'1.2-2':'pt-BR' }}</td>
+
+            <td>
+
+              <span
+                class="status-pill"
+                [ngClass]="{
+                  'pago': pagamento(v) === 'Recebida',
+                  'pendente': pagamento(v) === 'A receber',
+                  'cancelado': pagamento(v) === 'Cancelada' || pagamento(v) === 'Data inválida'
+                }">
+
+                {{ carregando ? 'Consultando...' : pagamento(v) }}
+
+              </span>
+
+            </td>
+
+            <td>
+
+              @if (v.status === 'CONCLUIDA') {
+
+                <button
+                  class="btn-outline"
+                  type="button"
+                  [disabled]="carregando" (click)="cancelarVenda(v)">
+
+                  Cancelar
+
+                </button>
+
+              } @else {
+
+                <span>—</span>
+
+              }
+
+            </td>
+
+          </tr>
+
+        </tbody>
+
+      </table>
+
+      <div class="table-footer">
+
+        <span>
+          Mostrando {{ inicio }}-{{ fim }} de {{ total }} registros
+        </span>
+
+      </div>
+
+    </div>
+
+  </main>

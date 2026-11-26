@@ -1,0 +1,69 @@
+/* You can add global styles to this file, and also import other style files */
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Playfair+Display:wght@500;600;700&display=swap');
+ 
+:root {
+  --paleta-vinho: #400414;
+  --paleta-bordo: #73162F;
+  --paleta-neve: #F2F2F2;
+  --paleta-pessego: #D98C5F;
+  --paleta-bege: #D9C6BA;
+  --paleta-terracota: #BF6D4E;
+  --paleta-malva: #684869;
+  --paleta-carvao: #181414;
+  --paleta-blush: #FCE3DC;
+  --paleta-taupe: #84685B;
+  --paleta-rosa-cinza: #BFA9A4;
+  --cor-vinho: var(--paleta-bordo);
+  --cor-bordo: var(--paleta-vinho);
+  --cor-neve: var(--paleta-neve);
+  --cor-pessego: var(--paleta-blush);
+  --cor-bege: #efe4df;
+  --cor-texto: var(--paleta-carvao);
+  --cor-cinza-sub: var(--paleta-taupe);
+  --cor-verde: #2e7d32; 
+}
+ 
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+ 
+body {
+  background-color: var(--cor-neve);
+  color: var(--cor-texto);
+  font-family: 'DM Sans', sans-serif;
+  height: 100vh;
+}
+/* Área administrativa permanente e formulários do protótipo JB MODA */
+.jb-admin {display:flex;min-height:100vh;align-items:stretch;}
+.jb-sidebar {width:250px;flex:0 0 250px;position:sticky;top:0;height:100vh;padding:24px;background:white;border-right:1px solid var(--paleta-bege);display:flex;flex-direction:column;}
+.jb-logo h2{color:var(--paleta-vinho);font-family:'Playfair Display',serif}.jb-logo span{font-size:12px;color:var(--paleta-taupe)}
+.jb-sidebar nav{display:flex;flex-direction:column;gap:12px;margin-top:32px;flex:1}.jb-sidebar nav a{padding:10px 14px;border-radius:8px;text-decoration:none;color:var(--cor-texto);font-size:14px}.jb-sidebar nav a.active,.jb-sidebar nav a:hover{background:var(--paleta-blush);color:var(--paleta-vinho);font-weight:600}
+.jb-user{border-top:1px solid var(--paleta-bege);padding-top:16px}.jb-user small{display:block}.jb-user button{border:0;background:none;color:var(--paleta-bordo);cursor:pointer;margin-top:8px;font:inherit}.jb-conteudo{flex:1;min-width:0}.jb-page{min-height:100vh;min-width:0;overflow-x:auto}.jb-page table{min-width:580px}
+.jb-overlay{position:fixed;inset:0;z-index:1000;background:#1b141480;display:flex;align-items:center;justify-content:center;padding:16px;overflow:auto}.jb-modal{width:min(620px,100%);max-height:calc(100dvh - 32px);overflow:auto;background:#fff;border:1px solid #d9c6ba;border-radius:12px;padding:32px;color:#400414;box-shadow:0 12px 50px #1b141433;font-family:'DM Sans',sans-serif}.jb-modal h2{font-size:28px;font-weight:700;line-height:1.4;margin:0 0 16px}.jb-modal p{font-size:14px;color:#84685b;margin:0 0 16px}.jb-modal fieldset{border:0;min-width:0}.jb-modal label{display:block;font-size:14px;font-weight:500;margin:0 0 8px}.jb-modal input,.jb-modal select,.jb-modal textarea{width:100%;min-height:44px;border:1px solid #d9c6ba;border-radius:22px;background:#f2f2f2;padding:10px 13px;color:#1b1414;font:inherit;font-size:14px;margin-bottom:16px}.jb-modal input:focus,.jb-modal select:focus,.jb-modal textarea:focus{outline:2px solid #73162f;outline-offset:1px}.jb-acoes{display:flex;gap:16px;margin-top:8px}.jb-prim,.jb-sec{font:inherit;font-size:14px;font-weight:500;min-height:42px;padding:9px 18px;border-radius:21px;cursor:pointer}.jb-prim{background:#73162f;color:white;border:1px solid #73162f;flex:2}.jb-sec{background:#fff;color:#73162f;border:1px solid #d9c6ba;flex:1}.jb-modal button:disabled{opacity:.6;cursor:not-allowed}.jb-modal .jb-erro,.jb-erro{background:#fff0ed;color:#9b2626;padding:12px;border:1px solid #e5a8a0;border-radius:8px;margin:8px 0 16px;line-height:1.5}.jb-aviso{position:fixed;right:24px;top:16px;z-index:1100;max-width:440px;background:white;color:#400414;border:1px solid #d9c6ba;border-left:5px solid #73162f;padding:14px 18px;border-radius:8px;box-shadow:0 4px 18px #1b141425;display:flex;gap:16px;align-items:center}.jb-aviso button{background:none;border:0;color:#73162f;font-size:22px;cursor:pointer}.jb-item{display:grid;grid-template-columns:minmax(0,1fr) 80px 44px;gap:8px;align-items:start}.jb-item button{padding:6px}.jb-modal .jb-total{margin-top:12px;color:#400414;font-weight:700}
+@media(max-width:760px){.jb-admin{display:block}.jb-sidebar{position:relative;width:100%;height:auto;padding:16px}.jb-sidebar nav{flex-direction:row;overflow-x:auto;gap:4px;margin:10px 0}.jb-user{display:flex;gap:8px;align-items:center}.jb-user button{margin:0 0 0 auto}.jb-page{padding:16px!important}.jb-modal{padding:20px}.jb-item{grid-template-columns:minmax(0,1fr) 64px 40px}}
+
+.jb-carregando{color:#84685b;font-size:14px;margin:10px 0}.jb-page button:disabled{opacity:.55;cursor:not-allowed}.jb-page .jb-erro button{margin-left:12px;min-height:32px;padding:5px 12px}.jb-page .cards-grid{min-width:0}.jb-modal button:focus-visible,.jb-sidebar a:focus-visible{outline:2px solid #73162f;outline-offset:2px}
+
+/* Espaçamento comum para todas as tabelas administrativas. */
+.jb-page table th, .jb-page table td {vertical-align: middle; overflow-wrap: anywhere;}
+.jb-page .table-card {overflow-x: auto;}
+.jb-page .table-card table {min-width: 760px;}
+.jb-page .table-card table th:not(:first-child), .jb-page .table-card table td:not(:first-child) {padding-inline: 10px !important;}
+.jb-page .table-card table td:last-child {min-width: 150px;}
+.jb-page .table-card table td:last-child button {margin: 4px 8px 4px 0;}
+.jb-page .table-card table td:last-child button:last-child {margin-right: 0;}
+.jb-page .table-card p {margin: 8px 0;}
+.jb-page .status-pill.convertido {background: #F2F2F2; color: #684B69;}
+.jb-page .status-pill.cancelado {background: #FCE3DC; color: #73162F;}
+.jb-page .status-pill + small {display: block; margin-top: 4px;}
+.jb-sidebar nav {min-height: 0; overflow-y: auto;}
+.jb-modal:focus {outline: none;}
+.jb-modal {display: flex; flex-direction: column; overflow: hidden;}
+.jb-modal > h2, .jb-modal > p {flex: none;}
+.jb-modal form {display: flex; flex-direction: column; min-height: 0; flex: 1 1 auto;}
+.jb-modal fieldset {min-height: 0; overflow-y: auto; padding: 2px 5px 2px 2px; flex: 1 1 auto;}
+.jb-modal .jb-acoes {flex: none; background: white; padding-top: 8px; margin-top: 12px;}
+.jb-modal .jb-erro {flex: none; max-height: 110px; overflow-y: auto;}
+@media(max-width:760px) { .jb-sidebar nav {overflow-y: visible;} }

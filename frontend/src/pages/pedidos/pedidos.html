@@ -1,0 +1,310 @@
+<!-- Conteúdo Principal -->
+  <main class="main-content jb-page">
+
+    <header class="top-bar">
+
+      <input
+        type="text"
+        placeholder="Buscar por produto, cliente, pedido..."
+        class="search-input"
+        [value]="busca"
+        (input)="aoBuscar($any($event.target).value)" />
+
+      <div class="top-right">
+
+        <div class="user-badge">
+          <strong>Olá, {{ gerente.nome }}</strong>
+          <small>{{ gerente.cargo }}</small>
+        </div>
+
+      </div>
+
+    </header>
+
+    <div class="pedidos-header-row">
+
+      <div>
+
+        <h1>Pedidos</h1>
+
+        <p class="subtitle">
+          Acompanhe e gerencie os pedidos dos clientes.
+        </p>
+
+      </div>
+
+      <div class="date-range-badge">
+        <span>Histórico de pedidos</span>
+      </div>
+
+    </div>
+
+    <p *ngIf="erro" class="jb-erro" role="alert">{{ erro }} <button type="button" class="jb-sec" (click)="erro = ''; carregarPedidos(); carregarClientes(); carregarProdutos()">Tentar novamente</button></p>
+
+    <p *ngIf="carregando" role="status" class="jb-carregando">Carregando informações...</p>
+    <!-- Indicadores -->
+    <div class="cards-grid">
+
+      <div class="card">
+
+        <span>Pedidos no mês</span>
+        <h3>{{ carregando || erro ? '—' : (pedidosNoMes) }}</h3>
+        <small>Total registrado no mês</small>
+
+      </div>
+
+      <div class="card">
+
+        <span>Convertidos em venda</span>
+        <h3>{{ carregando || erro ? '—' : (concluidos) }}</h3>
+        <small>Transformados em vendas</small>
+
+      </div>
+
+      <div class="card">
+
+        <span>Cancelados</span>
+        <h3>{{ carregando || erro ? '—' : (cancelados) }}</h3>
+        <small>Pedidos cancelados</small>
+
+      </div>
+
+      <div class="card alert-card">
+
+        <span>Abertos</span>
+        <h3>{{ carregando || erro ? '—' : (abertos) }}</h3>
+        <small>Aguardando confirmação</small>
+
+      </div>
+
+    </div>
+
+    <!-- Barra de Ações -->
+    <div class="action-bar">
+
+      <input
+        type="text"
+        placeholder="Buscar pedidos..."
+        class="search-pedidos"
+        [value]="busca"
+        (input)="aoBuscar($any($event.target).value)" />
+
+      <div class="action-buttons">
+
+        <button
+          class="btn-outline"
+          type="button"
+          (click)="alternarFiltros()">
+          Filtros
+        </button>
+
+        <button
+          class="btn-outline"
+          type="button"
+          (click)="exportar()">
+          Exportar
+        </button>
+
+        <button
+          class="btn-primary"
+          type="button"
+          [disabled]="carregando" (click)="novoPedido()">
+          + Novo pedido
+        </button>
+
+      </div>
+
+    </div>
+
+    <!-- Filtros -->
+    @if (filtrosAbertos) {
+
+      <div class="filtros-panel">
+
+        <label>
+
+          Filtrar por status:
+
+          <select
+            [value]="filtroSelecionado"
+            (change)="escolherFiltro($any($event.target).value)">
+
+            <option value="Todos">
+              Todos
+            </option>
+
+            <option value="ABERTO">
+              Aberto
+            </option>
+
+            <option value="CONCLUIDO">
+              Convertido em venda
+            </option>
+
+            <option value="CANCELADO">
+              Cancelado
+            </option>
+
+          </select>
+
+        </label>
+
+        <button
+          class="btn-outline"
+          type="button"
+          (click)="limparFiltros()">
+          Limpar filtros
+        </button>
+
+      </div>
+
+    }
+
+    <!-- Tabela -->
+    <div class="table-card">
+
+      <h3>Todos os pedidos</h3>
+
+      <table class="pedidos-table">
+
+        <thead>
+
+          <tr>
+            <th>Pedido</th>
+            <th>Cliente</th>
+            <th>Data</th>
+            <th>Produtos</th>
+            <th>Entrega</th>
+            <th>Valor</th>
+            <th>Status</th>
+            <th>Ações</th>
+          </tr>
+
+        </thead>
+
+        <tbody>
+
+          <tr *ngIf="total === 0">
+
+            <td colspan="8" class="sem-resultado">
+              {{ carregando ? 'Carregando registros...' : erro ? 'Não foi possível consultar todos os dados.' : 'Nenhum registro encontrado.' }}
+            </td>
+
+          </tr>
+
+          <tr *ngFor="let p of pedidosFiltrados">
+
+            <td>
+              <strong>#{{ p.id }}</strong>
+            </td>
+
+            <td>{{ nomeCliente(p) }}</td>
+
+            <td>{{ p.data | date:'dd/MM/yyyy' }}</td>
+
+            <td>
+
+              <div *ngFor="let item of p.itens">
+
+                {{ nomeProduto(item) }}
+                ({{ item.quantidade }} un.)
+
+              </div>
+
+            </td>
+
+            <td>
+
+              {{ p.tipoEntrega === 'ENTREGA'
+                ? 'Entrega'
+                : 'Retirada' }}
+
+              <div *ngIf="p.tipoEntrega === 'ENTREGA'">
+
+                <small>{{ p.enderecoEntrega }}</small>
+
+                <small>
+                  Frete: {{ p.frete | currency:'BRL':'symbol':'1.2-2':'pt-BR' }}
+                </small>
+
+              </div>
+
+            </td>
+
+            <td>{{ valorPedido(p) | currency:'BRL':'symbol':'1.2-2':'pt-BR' }}</td>
+
+            <td>
+
+              <span
+                class="status-pill"
+                [ngClass]="{
+                  'convertido': p.status === 'CONCLUIDO',
+                  'pendente': p.status === 'ABERTO'
+                }">
+
+                {{ p.status === 'CONCLUIDO'
+                  ? 'Convertido em venda'
+                  : p.status === 'ABERTO'
+                    ? 'Aberto'
+                    : 'Cancelado' }}
+
+              </span>
+
+            </td>
+
+            <td>
+
+              @if (p.status === 'ABERTO') {
+
+                <button
+                  class="btn-outline"
+                  type="button"
+                  [disabled]="carregando" (click)="editarPedido(p)">
+                  Editar
+                </button>
+
+                <button
+                  class="btn-primary"
+                  type="button"
+                  [disabled]="carregando" (click)="confirmarPedido(p)">
+                  Confirmar
+                </button>
+
+                <button
+                  class="btn-outline"
+                  type="button"
+                  [disabled]="carregando" (click)="cancelarPedido(p)">
+                  Cancelar
+                </button>
+
+              } @else {
+
+                <span>—</span>
+
+              }
+
+            </td>
+
+          </tr>
+
+        </tbody>
+
+      </table>
+
+      <div class="table-footer">
+
+        <span>
+          Mostrando {{ inicio }}-{{ fim }} de {{ total }} registros
+        </span>
+
+      </div>
+
+    </div>
+
+    <footer class="footer-demo">
+
+      <p>JB MODA · Gestão de pedidos</p>
+
+    </footer>
+
+  </main>

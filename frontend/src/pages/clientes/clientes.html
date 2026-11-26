@@ -1,0 +1,288 @@
+<!-- Conteúdo Principal -->
+  <main class="main-content jb-page">
+
+    <header class="top-bar">
+
+      <input
+        type="text"
+        placeholder="Buscar clientes..."
+        class="search-input"
+        [value]="busca"
+        (input)="aoBuscar($any($event.target).value)" />
+
+      <div class="top-right">
+
+        <div class="user-badge">
+          <strong>Olá, {{ gerente.nome }}</strong>
+          <small>{{ gerente.cargo }}</small>
+        </div>
+
+      </div>
+
+    </header>
+
+    <div class="clientes-header-row">
+
+      <div>
+        <h1>Clientes</h1>
+
+        <p class="subtitle">
+          Conheça seus clientes e acompanhe o relacionamento.
+        </p>
+      </div>
+
+      <div class="date-range-badge">
+        <span>Histórico de clientes</span>
+      </div>
+
+    </div>
+
+    <p *ngIf="erro" class="jb-erro" role="alert">{{ erro }} <button type="button" class="jb-sec" (click)="erro = ''; carregarClientes(); carregarVendas()">Tentar novamente</button></p>
+
+    <p *ngIf="carregando" role="status" class="jb-carregando">Carregando informações...</p>
+    <!-- Indicadores -->
+    <div class="cards-grid">
+
+      <div class="card">
+
+        <span>Clientes cadastrados</span>
+        <h3>{{ carregando || erro ? '—' : (clientesCadastrados) }}</h3>
+        <small>Total de clientes</small>
+
+      </div>
+
+      <div class="card">
+
+        <span>Clientes ativos</span>
+
+        <h3>
+          {{ carregando || erro ? '—' : (vendasCarregadas ? clientesAtivos : '—') }}
+        </h3>
+
+        <small>Compraram nos últimos 90 dias</small>
+
+      </div>
+
+      <div class="card">
+
+        <span>Ticket médio</span>
+
+        <h3>
+          {{ carregando || erro ? '—' : (vendasCarregadas
+            ? (ticketMedio | currency:'BRL':'symbol':'1.2-2':'pt-BR')
+            : '—') }}
+        </h3>
+
+        <small>Valor médio por venda concluída</small>
+
+      </div>
+
+      <div class="card alert-card">
+
+        <span>Fidelização</span>
+
+        <h3>
+          {{ carregando || erro ? '—' : (vendasCarregadas
+            ? (fidelizacao | number:'1.0-1') + '%'
+            : '—') }}
+        </h3>
+
+        <small>Clientes recorrentes</small>
+
+      </div>
+
+    </div>
+
+    <!-- Barra de Ações -->
+    <div class="action-bar">
+
+      <input
+        type="text"
+        placeholder="Buscar clientes..."
+        class="search-clientes"
+        [value]="busca"
+        (input)="aoBuscar($any($event.target).value)" />
+
+      <div class="action-buttons">
+
+        <button
+          class="btn-outline"
+          type="button"
+          (click)="alternarFiltros()">
+          Filtros
+        </button>
+
+        <button
+          class="btn-outline"
+          type="button"
+          (click)="exportar()">
+          Exportar
+        </button>
+
+        <button
+          class="btn-primary"
+          type="button"
+          [disabled]="carregando" (click)="novoCliente()">
+          + Cliente
+        </button>
+
+      </div>
+
+    </div>
+
+    <!-- Filtros -->
+    @if (filtrosAbertos) {
+
+      <div class="filtros-panel">
+
+        <label>
+          Filtrar por perfil:
+
+          <select
+            [value]="filtroSelecionado"
+            (change)="escolherFiltro($any($event.target).value)">
+
+            <option value="Todos">Todos</option>
+            <option value="Novo">Novo</option>
+            <option value="Recorrente">Recorrente</option>
+            <option value="Sem compras">Sem compras</option>
+
+          </select>
+
+        </label>
+
+        <button
+          class="btn-outline"
+          type="button"
+          (click)="limparFiltros()">
+
+          Limpar filtros
+
+        </button>
+
+      </div>
+
+    }
+
+    <!-- Tabela -->
+    <div class="table-card">
+
+      <h3>Base de clientes</h3>
+
+      <table class="clientes-table">
+
+        <thead>
+          <tr>
+            <th>Cliente</th>
+            <th>Contato</th>
+            <th>Endereço</th>
+            <th>Última compra</th>
+            <th>Compras</th>
+            <th>Total comprado</th>
+            <th>Perfil</th>
+            <th>Ações</th>
+          </tr>
+        </thead>
+
+        <tbody>
+
+          <tr *ngIf="total === 0">
+
+            <td colspan="8" class="sem-resultado">
+              {{ carregando ? 'Carregando registros...' : erro ? 'Não foi possível consultar todos os dados.' : 'Nenhum registro encontrado.' }}
+            </td>
+
+          </tr>
+
+          <tr *ngFor="let c of clientesFiltrados">
+
+            <td><strong>{{ c.nome }}</strong></td>
+
+            <td>{{ c.telefone }}</td>
+
+            <td>{{ c.endereco || '—' }}</td>
+
+            <td>
+              {{ ultimaCompra(c) === '—'
+                ? '—'
+                : (ultimaCompra(c) | date:'dd/MM/yyyy') }}
+            </td>
+
+            <td>
+              {{ vendasCarregadas
+                ? comprasCliente(c).length
+                : '—' }}
+            </td>
+
+            <td>
+              {{ vendasCarregadas
+                ? (totalGasto(c) | currency:'BRL':'symbol':'1.2-2':'pt-BR')
+                : '—' }}
+            </td>
+
+            <td>
+
+              <span class="status-pill"
+                    [ngClass]="{
+                      'recorrente': perfil(c) === 'Recorrente',
+                      'novo': perfil(c) === 'Novo'
+                    }">
+
+                {{ perfil(c) }}
+
+              </span>
+
+            </td>
+
+            <td>
+
+              <button
+                class="btn-outline"
+                type="button"
+                [disabled]="carregando" (click)="editarCliente(c)">
+
+                Editar
+
+              </button>
+
+              <button
+                class="btn-outline"
+                type="button"
+                [disabled]="carregando" (click)="excluirCliente(c)">
+
+                Excluir
+
+              </button>
+
+            </td>
+
+          </tr>
+
+        </tbody>
+
+      </table>
+
+      <div class="table-footer">
+
+        <span>
+          Mostrando {{ inicio }}-{{ fim }} de {{ total }} registros
+        </span>
+
+      </div>
+
+    </div>
+
+    <div class="alert-banner">
+
+      <span>
+        Dica: acompanhe clientes recorrentes para personalizar
+        o atendimento.
+      </span>
+
+    </div>
+
+    <footer class="footer-demo">
+      <p>JB MODA · Gestão de clientes</p>
+    </footer>
+
+  </main>

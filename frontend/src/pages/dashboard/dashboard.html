@@ -1,0 +1,181 @@
+<!-- Conteúdo principal -->
+  <main class="main-content jb-page">
+
+    <header class="top-bar">
+
+      <input
+        type="text"
+        placeholder="Buscar por produto, cliente, pedido..."
+        class="search-input"
+        [value]="busca"
+        (input)="busca = $any($event.target).value" />
+
+      <span *ngIf="dados">
+
+        {{ dados.vendasDoMes.inicio | date:'dd/MM/yyyy' }}
+        -
+        {{ dados.vendasDoMes.fim | date:'dd/MM/yyyy' }}
+
+      </span>
+
+    </header>
+
+    <section>
+
+      <h1>Visão geral da loja</h1>
+
+      <p>
+        Acompanhe os indicadores e o desempenho do seu negócio.
+      </p>
+
+    </section>
+
+    <p *ngIf="erro" class="jb-erro" role="alert">
+      {{ erro }} <button class="jb-sec" (click)="carregarDashboard()">Tentar novamente</button>
+    </p>
+
+    <p *ngIf="!dados && !erro">
+      Carregando informações...
+    </p>
+
+    <!-- Indicadores -->
+    <div class="cards-grid">
+
+      <div class="card">
+
+        <span>Faturamento do mês</span>
+
+        <h3>{{ dados ? (faturamentoMes | currency:'BRL':'symbol':'1.2-2':'pt-BR') : '—' }}</h3>
+
+        <small>
+          Valor total das vendas concluídas
+        </small>
+
+      </div>
+
+      <div class="card">
+
+        <span>Vendas realizadas</span>
+
+        <h3>{{ dados ? vendasRealizadas : '—' }}</h3>
+
+        <small>
+          Vendas concluídas neste mês
+        </small>
+
+      </div>
+
+      <div class="card">
+
+        <span>Peças no estoque</span>
+
+        <h3>{{ dados ? pecasEstoque : '—' }}</h3>
+
+        <small>
+          {{ dados?.produtos ?? '—' }} produtos cadastrados
+        </small>
+
+      </div>
+
+      <div class="card">
+
+        <span>Estoque baixo</span>
+
+        <h3>{{ dados ? estoqueBaixo : '—' }}</h3>
+
+        <small class="text-danger">
+          Produtos precisam de reposição
+        </small>
+
+      </div>
+
+    </div>
+
+    <!-- Pedidos e estoque -->
+    <div class="sections-grid">
+
+      <div class="box">
+
+        <h3>Pedidos recentes</h3>
+
+        <table class="data-table">
+
+          <tbody>
+
+            <tr *ngIf="pedidosRecentesFiltrados.length === 0">
+
+              <td colspan="4">
+                {{ dados ? 'Nenhum pedido encontrado.' : erro ? 'Não foi possível consultar os pedidos.' : 'Carregando pedidos...' }}
+              </td>
+
+            </tr>
+
+            <tr *ngFor="let pedido of pedidosRecentesFiltrados">
+
+              <td>
+                <strong>#{{ pedido.id }}</strong>
+              </td>
+
+              <td>{{ nomeCliente(pedido) }}</td>
+
+              <td>
+                {{ valorPedido(pedido) | currency:'BRL':'symbol':'1.2-2':'pt-BR' }}
+              </td>
+
+              <td>
+
+                <span [ngClass]="{
+                  'tag-up': pedido.status === 'CONCLUIDO',
+                  'text-danger': pedido.status === 'CANCELADO'
+                }">
+
+                  {{ nomeStatus(pedido) }}
+
+                </span>
+
+              </td>
+
+            </tr>
+
+          </tbody>
+
+        </table>
+
+      </div>
+
+      <div class="box">
+
+        <h3>Produtos com estoque baixo</h3>
+
+        <p *ngIf="produtosEstoqueBaixoFiltrados.length === 0">
+
+          {{ dados ? 'Nenhum produto precisa de reposição.' : erro ? 'Não foi possível consultar o estoque.' : 'Carregando estoque...' }}
+
+        </p>
+
+        <ul class="stock-list">
+
+          <li *ngFor="let prod of produtosEstoqueBaixoFiltrados">
+
+            <span>
+
+              {{ prod.nome }}
+              {{ prod.cor }}/{{ prod.tamanho }}
+
+            </span>
+
+            <strong class="text-danger">
+
+              {{ prod.quantidadeEstoque }} un.
+
+            </strong>
+
+          </li>
+
+        </ul>
+
+      </div>
+
+    </div>
+
+  </main>

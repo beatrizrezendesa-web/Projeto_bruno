@@ -1,0 +1,305 @@
+<header class="topo">
+  <div class="container topo-conteudo">
+    <a href="#inicio" class="logo">
+      <strong>JB MODA</strong>
+      <span>FITNESS &amp; PRAIA</span>
+    </a>
+
+    <nav class="menu">
+      @for (item of menu; track item.rotulo) {
+        <a [href]="item.alvo">{{ item.rotulo }}</a>
+      }
+    </nav>
+
+    <a routerLink="/login" class="btn-acesso">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <rect x="4" y="11" width="16" height="10" rx="2" />
+        <path d="M8 11V7a4 4 0 0 1 8 0v4" />
+      </svg>
+      Acesso Restrito
+    </a>
+  </div>
+</header>
+
+<section class="hero fundo-cinza" id="inicio">
+  <div class="container hero-conteudo">
+    <div class="hero-texto">
+      <span class="eyebrow">FITNESS &amp; PRAIA · PICOS, PI</span>
+      <h1>Seu treino.<br />Seu verão.<br />Seu jeito.</h1>
+      <p>
+        Peças para se movimentar com conforto e aproveitar os dias de sol com
+        confiança. Conheça a JB MODA: atendimento próximo, loja física em Picos
+        e envios para todo o Brasil.
+      </p>
+
+      <div class="hero-botoes">
+        <a [href]="whatsappLink" target="_blank" rel="noopener" class="btn btn-vinho">Falar no WhatsApp →</a>
+        <a href="#favoritos" class="btn btn-branco">Explorar a coleção</a>
+      </div>
+
+      <ul class="hero-tags">
+        @for (t of tags; track t) {
+          <li>{{ t }}</li>
+        }
+      </ul>
+    </div>
+
+    <div class="hero-visual">
+      <div class="hero-circulo"></div>
+
+      <div class="moldura hero-foto-1">
+        <img src="img/hero-principal.png" alt="Mulher treinando com conjunto vinho da JB MODA" />
+      </div>
+
+      <span class="hero-selo">FITNESS &amp; PRAIA</span>
+
+      <div class="moldura hero-foto-2">
+        <img src="img/hero-grupo.png" alt="Três mulheres usando peças fitness da JB MODA" />
+      </div>
+
+      <div class="hero-cartao">
+        <small>Conforto que acompanha</small>
+        <strong>todos os seus ritmos.</strong>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="secao fundo-branco" id="favoritos">
+  <div class="container">
+    <span class="eyebrow">ESCOLHAS DA JB</span>
+    <h2>Os favoritos da loja</h2>
+
+    @for (g of grupos; track g.titulo) {
+      <div class="grupo">
+        <h3 class="grupo-titulo">{{ g.titulo }}</h3>
+        <p class="grupo-sub">{{ g.subtitulo }}</p>
+
+        <div class="grade-fav">
+          @for (item of g.itens; track item.nome) {
+            <article class="fav">
+              <img [src]="item.imagem" [alt]="item.nome" />
+              <h4>{{ item.nome }}</h4>
+              <p>{{ item.descricao }}</p>
+              <strong class="valor">Consulte o valor</strong>
+              <div class="fav-botoes">
+                <a [href]="whatsappLink" target="_blank" rel="noopener" class="btn btn-vinho btn-mini">Pedir pelo WhatsApp</a>
+                <a [href]="instagramLink" target="_blank" rel="noopener" class="btn btn-branco btn-mini">Instagram</a>
+              </div>
+            </article>
+          }
+        </div>
+      </div>
+    }
+  </div>
+</section>
+
+<section class="secao fundo-rosa" id="colecao">
+  <div class="container">
+    <span class="eyebrow">NOVA ESTAÇÃO</span>
+    <h2>Novidades para acompanhar seu ritmo</h2>
+    <p class="lead">
+      Novidades de moda fitness e praia. Arraste para o lado ou explore pelas setas.
+    </p>
+
+    <div class="trilho" #trilho>
+      @for (n of novidades; track n.titulo) {
+        <article class="slide">
+          <img [src]="n.imagem" [alt]="n.titulo" />
+          <p>{{ n.titulo }}</p>
+        </article>
+      }
+    </div>
+
+    <div class="carrossel-controles">
+      <button type="button" class="seta" (click)="rolar(-1)" aria-label="Anterior">←</button>
+      <button type="button" class="seta" (click)="rolar(1)" aria-label="Próximo">→</button>
+    </div>
+  </div>
+</section>
+
+<section class="secao fundo-cinza" id="contato">
+  <div class="container">
+    <span class="eyebrow">VAMOS CONVERSAR</span>
+    <h2>Seu próximo look começa por aqui</h2>
+    <p class="lead">
+      Escolha o canal que combina com você. Nossa equipe ajuda com peças, tamanhos e pedidos.
+    </p>
+
+    <div class="grade-canais">
+      <article class="canal">
+        <h3>Instagram</h3>
+        <strong class="canal-destaque">{{ instagramUsuario }}</strong>
+        <p>Inspirações, novidades e atendimento pelo direct.</p>
+        <a [href]="instagramLink" target="_blank" rel="noopener" class="btn btn-branco btn-bloco">Ver Instagram</a>
+      </article>
+
+      <article class="canal">
+        <h3>Grupo VIP</h3>
+        <strong class="canal-destaque">Novidades em primeira mão</strong>
+        <p>Entre no grupo para acompanhar os lançamentos da loja.</p>
+        <a [href]="grupoVipLink" target="_blank" rel="noopener" class="btn btn-branco btn-bloco">Entrar no grupo VIP</a>
+      </article>
+
+      <article class="canal">
+        <h3>WhatsApp comercial</h3>
+        <strong class="canal-destaque">{{ whatsappNumero }}</strong>
+        <p>Fale com a equipe e monte seu pedido com tranquilidade.</p>
+        <a [href]="whatsappLink" target="_blank" rel="noopener" class="btn btn-branco btn-bloco">Conversar no WhatsApp</a>
+      </article>
+    </div>
+  </div>
+</section>
+
+<section class="secao fundo-branco" id="sobre">
+  <div class="container sobre-conteudo">
+    <div class="sobre-texto">
+      <span class="eyebrow">SOBRE A JB</span>
+      <span class="linha"></span>
+      <h2>Moda para viver<br />o seu melhor ritmo.</h2>
+      <p>
+        A JB MODA Fitness e Praia é uma loja física e online de Picos, no Piauí.
+        Aqui, você encontra peças para o treino, para a praia e para os momentos
+        de lazer, com um atendimento próximo para ajudar a escolher o que faz
+        sentido para você.
+      </p>
+    </div>
+
+    <div class="sobre-visual">
+      <div class="sobre-moldura">
+        <img src="img/sobre.jpg" alt="Peças fitness da JB MODA penduradas em cabides" />
+      </div>
+      <div class="sobre-selo">
+        <strong>Da nossa loja para o seu dia.</strong>
+        <span>Picos, PI · loja física e online</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="secao fundo-cinza">
+  <div class="container">
+    <span class="eyebrow">FEITA PARA A SUA ROTINA</span>
+    <h2>Por que escolher a JB MODA?</h2>
+    <p class="lead">Mais cuidado em cada escolha, do treino aos dias de praia.</p>
+
+    <div class="grade-diferenciais">
+      @for (d of diferenciais; track d.titulo) {
+        <article class="diferencial">
+          <h3>{{ d.titulo }}</h3>
+          <p>{{ d.texto }}</p>
+        </article>
+      }
+    </div>
+  </div>
+</section>
+
+<section class="secao fundo-quente" id="loja">
+  <div class="container loja-conteudo">
+    <div class="loja-texto">
+      <span class="eyebrow">NOSSA LOJA EM PICOS</span>
+      <h2>Venha nos conhecer</h2>
+      <p class="lead">
+        Experimente as peças e escolha seu próximo look com a ajuda da nossa equipe.
+      </p>
+
+      <address class="loja-endereco">
+        Av. Nossa Senhora de Fátima, 453<br />
+        Sala 104 · 1º andar · Posto Total<br />
+        Canto da Várzea · Picos – PI<br />
+        CEP 64600-148
+      </address>
+
+      <p class="loja-horario">
+        Segunda a sexta: das 8h às 18h<br />
+        Sábado: das 8h às 12h
+      </p>
+
+      <a [href]="mapsLink" target="_blank" rel="noopener" class="btn btn-vinho">Abrir no Google Maps ↗</a>
+    </div>
+
+    <div class="mapa-bloco">
+      <svg class="mapa" viewBox="0 0 400 400" role="img" aria-label="Mapa ilustrativo da localização da JB MODA">
+        <defs>
+          <clipPath id="recorte-mapa"><circle cx="200" cy="200" r="190" /></clipPath>
+        </defs>
+        <g clip-path="url(#recorte-mapa)">
+          <rect width="400" height="400" fill="#D9C6BA" />
+          <!-- rio -->
+          <path d="M0 255 C100 235 200 295 400 262 L400 312 C200 350 100 292 0 305 Z" fill="#BFA9A4" />
+          <!-- ruas -->
+          <polygon points="95,0 150,0 305,400 250,400" fill="#f4eeea" />
+          <polygon points="0,105 400,225 400,262 0,142" fill="#f4eeea" />
+          <polygon points="335,0 375,18 190,400 150,382" fill="#f4eeea" />
+          <!-- quadras -->
+          <rect x="108" y="170" width="48" height="36" rx="8" fill="#D98C5F" />
+          <rect x="300" y="58" width="44" height="44" rx="8" fill="#BF6D4E" />
+          <rect x="280" y="288" width="44" height="44" rx="8" fill="#BF6D4E" />
+        </g>
+        <!-- pin -->
+        <circle cx="222" cy="198" r="17" fill="#73162F" />
+        <circle cx="222" cy="198" r="5.5" fill="#fff" />
+        <text x="222" y="232" text-anchor="middle" font-size="12" fill="#400414" font-family="DM Sans, sans-serif">JB MODA</text>
+      </svg>
+      <small>Representação ilustrativa · veja a localização no Google Maps</small>
+    </div>
+  </div>
+</section>
+
+<section class="secao fundo-branco" id="duvidas">
+  <div class="container faq-conteudo">
+    <div class="faq-texto">
+      <span class="eyebrow">PODEMOS AJUDAR?</span>
+      <h2>Antes de fazer<br />o seu pedido</h2>
+      <p class="lead">
+        Toque em uma pergunta para abrir a resposta. Se precisar, nossa equipe
+        está a uma mensagem de distância.
+      </p>
+      <a [href]="whatsappLink" target="_blank" rel="noopener" class="btn btn-vinho">Falar com a loja</a>
+    </div>
+
+    <div class="faq-lista">
+      @for (p of perguntas; track p.pergunta; let i = $index) {
+        <div class="faq-item" [class.aberto]="faqAberta === i">
+          <button type="button" class="faq-pergunta" (click)="alternarFaq(i)" [attr.aria-expanded]="faqAberta === i">
+            <span>{{ p.pergunta }}</span>
+            <span class="faq-icone">{{ faqAberta === i ? '−' : '+' }}</span>
+          </button>
+          @if (faqAberta === i) {
+            <p class="faq-resposta">{{ p.resposta }}</p>
+          }
+        </div>
+      }
+    </div>
+  </div>
+</section>
+
+<footer class="rodape">
+  <div class="container rodape-conteudo">
+    <div class="rodape-marca">
+      <strong>JB MODA</strong>
+      <p class="rodape-slogan">Fitness e praia para viver o seu ritmo.</p>
+      <p class="rodape-endereco">
+        Av. Nossa Senhora de Fátima, 453 · Sala 104<br />
+        1º andar do Posto Total · Picos – PI
+      </p>
+    </div>
+
+    <div class="rodape-col">
+      <h4>Explore a JB</h4>
+      <a href="#favoritos">Favoritos da loja</a>
+      <a href="#colecao">Coleção da estação</a>
+      <a href="#contato">Contato</a>
+      <a href="#duvidas">Dúvidas frequentes</a>
+    </div>
+
+    <div class="rodape-col">
+      <h4>Vamos conversar</h4>
+      <span>WhatsApp: {{ whatsappNumero }}</span>
+      <span>Instagram: {{ instagramUsuario }}</span>
+      <span>Seg–sex: 8h às 18h · Sáb: 8h às 12h</span>
+    </div>
+  </div>
+
+  <p class="rodape-copy">© 2026 JB MODA Fitness e Praia. Todos os direitos reservados.</p>
+</footer>

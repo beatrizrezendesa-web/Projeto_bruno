@@ -1,0 +1,51 @@
+@if (modal.aviso()) {
+  <div class="jb-aviso" role="status">{{ modal.aviso() }} <button type="button" aria-label="Fechar aviso" (click)="modal.aviso.set('')">×</button></div>
+}
+@if (modal.config(); as c) {
+  <div class="jb-overlay" (keydown)="teclado($event)">
+    <section class="jb-modal" tabindex="-1" role="dialog" aria-modal="true" aria-labelledby="jb-modal-title">
+      <h2 id="jb-modal-title">{{ c.titulo }}</h2>
+      <p>{{ c.descricao || 'Preencha os dados para continuar.' }}</p>
+      <form (ngSubmit)="modal.salvar()" novalidate>
+        <fieldset [disabled]="modal.salvando()">
+          @for (f of c.campos || []; track f.chave) {
+            @if (!f.visivel || f.visivel(modal.valores())) {
+              <label [for]="'jb-'+f.chave">{{ f.rotulo }}{{ f.obrigatorio ? ' *' : '' }}</label>
+              @if (f.tipo === 'select') {
+                <select [id]="'jb-'+f.chave" [ngModel]="modal.valores()[f.chave]" (ngModelChange)="modal.mudar(f.chave,$event)" [name]="f.chave">
+                  @for (o of f.opcoes || []; track $index) { <option [ngValue]="o.valor">{{ o.texto }}</option> }
+                </select>
+              } @else if (f.tipo === 'textarea') {
+                <textarea [id]="'jb-'+f.chave" [ngModel]="modal.valores()[f.chave]" (ngModelChange)="modal.mudar(f.chave,$event)" [name]="f.chave" rows="3"></textarea>
+              } @else if (f.tipo === 'number') {
+                <input type="number" [id]="'jb-'+f.chave" [min]="f.min ?? 0" [step]="f.step ?? 0.01" [ngModel]="modal.valores()[f.chave]" (ngModelChange)="modal.mudar(f.chave,$event)" [name]="f.chave" />
+              } @else {
+                <input [type]="f.tipo || 'text'" [attr.min]="f.dataMin || null" [attr.max]="f.dataMax || null" [id]="'jb-'+f.chave" [ngModel]="modal.valores()[f.chave]" (ngModelChange)="modal.mudar(f.chave,$event)" [name]="f.chave" />
+              }
+            }
+          }
+          @if (c.produtos) {
+            <label>Produtos *</label>
+            @for (item of modal.itens(); track $index; let i=$index) {
+              <div class="jb-item">
+                <select [attr.aria-label]="'Produto '+(i+1)" [ngModel]="item.produtoId" (ngModelChange)="modal.mudarItem(i,'produtoId',$event)" [name]="'produto'+i">
+                  <option [ngValue]="null">Selecione um produto</option>
+                  @for (p of c.produtos; track p.id) { <option [ngValue]="p.id" [disabled]="!p.disponivel || (!!c.validarEstoque && p.estoque <= 0)">{{ p.nome }} — {{ p.preco | currency:'BRL':'symbol':'1.2-2':'pt-BR' }} ({{ p.estoque }} un.)</option> }
+                </select>
+                <input aria-label="Quantidade" type="number" min="1" step="1" [ngModel]="item.quantidade" (ngModelChange)="modal.mudarItem(i,'quantidade',$event)" [name]="'quantidade'+i" />
+                <button type="button" class="jb-sec" (click)="modal.remover(i)" aria-label="Remover produto">×</button>
+              </div>
+            }
+            <button class="jb-sec" type="button" (click)="modal.adicionar()">+ Adicionar produto</button>
+            <p class="jb-total">Subtotal: {{ modal.total | currency:'BRL':'symbol':'1.2-2':'pt-BR' }}</p>
+          }
+        </fieldset>
+        @if (modal.erro()) { <p class="jb-erro" role="alert">{{ modal.erro() }}</p> }
+        <div class="jb-acoes">
+          <button class="jb-sec" type="button" [disabled]="modal.salvando()" (click)="modal.fechar()">Cancelar</button>
+          <button class="jb-prim" type="submit" [disabled]="modal.salvando()">{{ modal.salvando() ? 'Aguarde...' : c.botao }}</button>
+        </div>
+      </form>
+    </section>
+  </div>
+}
